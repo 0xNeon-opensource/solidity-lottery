@@ -32,7 +32,7 @@ const { networkConfig, developmentChains } = require('../helper-hardhat-config')
 skip.if(!developmentChains.includes(network.name)).
   describe('EthArNFT Unit Tests', async function () {
     let contract;
-    const MINT_PRICE_IN_ETHER = ethers.utils.parseEther("0.1").toHexString();
+    const MINT_PRICE_IN_ETHER = ethers.utils.parseEther("0.01").toHexString();
 
     beforeEach(async () => {
       await deployments.fixture(['ethArNft']);
