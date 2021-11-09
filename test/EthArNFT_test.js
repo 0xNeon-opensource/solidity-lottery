@@ -10,6 +10,7 @@ const fs = require('fs')
 const { deployments, getChainId } = require('hardhat')
 const { networkConfig, developmentChains } = require('../helper-hardhat-config')
 
+// Kept for manual testing:
 // const tokenSignaturePairs = {
 //   0: {
 //     tokenUri: 'http://localhost:1984/fy9R3-Cm1wN9k3HHzvci-nBDbx5IzyollMHnG3VDOao',
