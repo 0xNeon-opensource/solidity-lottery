@@ -92,7 +92,7 @@ skip.if(!developmentChains.includes(network.name)).
           { value: MINT_PRICE_IN_ETHER }
         );
 
-        const tokenUri = await contract.tokenUri(0);
+        const tokenUri = await contract.tokenURI(0);
         assert.equal(tokenUri, tokenSignaturePairs[0].tokenUri);
       })
 
