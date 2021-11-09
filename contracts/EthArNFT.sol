@@ -10,14 +10,23 @@ import "hardhat/console.sol";
 contract EthArNFT is ERC721URIStorage, Ownable {
     using ECDSA for bytes32;
 
+    uint256 public constant MAX_SUPPLY = 100;
+    uint256 public constant PRICE = 0.001 ether;
+
     uint256 public tokenCounter;
     address private trueSigner;
+
     mapping(string => bool) tokenUriExists;
 
     event CreatedEthArNFT(uint256 indexed tokenId, string tokenURI);
 
     modifier doesNotExceedMaxSupply() {
-        require(totalSupply() < 3333);
+        require(totalSupply() < MAX_SUPPLY);
+        _;
+    }
+
+    modifier hasMinimumPayment(uint256 value) {
+        require(value >= PRICE);
         _;
     }
 
@@ -40,8 +49,9 @@ contract EthArNFT is ERC721URIStorage, Ownable {
     }
 
     function mint(string memory tokenUri, bytes memory signature)
-        public
+        public payable
         doesNotExceedMaxSupply
+        hasMinimumPayment(msg.value)
         tokenUriDoesNotExist(tokenUri)
         ensureValidSignature(tokenUri, signature)
     {

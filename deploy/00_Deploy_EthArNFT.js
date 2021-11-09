@@ -27,4 +27,4 @@ module.exports = async ({
     // await tx.wait(1)
 }
 
-module.exports.tags = ['all', 'svg']
+module.exports.tags = ['all', 'ethArNft']
