@@ -11,7 +11,7 @@ contract EthArNFT is ERC721URIStorage, Ownable {
     using ECDSA for bytes32;
 
     uint256 public constant MAX_SUPPLY = 100;
-    uint256 public constant PRICE = 0.001 ether;
+    uint256 public constant PRICE = 0.01 ether;
 
     uint256 public tokenCounter;
     address private trueSigner;
@@ -21,7 +21,7 @@ contract EthArNFT is ERC721URIStorage, Ownable {
     event CreatedEthArNFT(uint256 indexed tokenId, string tokenURI);
 
     modifier doesNotExceedMaxSupply() {
-        require(totalSupply() < MAX_SUPPLY);
+        require(totalSupply() < MAX_SUPPLY, "Max supply has already been minted.");
         _;
     }
 
@@ -42,14 +42,13 @@ contract EthArNFT is ERC721URIStorage, Ownable {
         _;
     }
 
-
     constructor() ERC721("Eth Arweave NFT", "ETHARNFT") {
         tokenCounter = 0;
         trueSigner = 0xDBA800F4Da03Dba3f604268aeC2AD9EB28A055A4;
     }
 
     function mint(string memory tokenUri, bytes memory signature)
-        public payable
+        external payable
         doesNotExceedMaxSupply
         hasMinimumPayment(msg.value)
         tokenUriDoesNotExist(tokenUri)
@@ -63,6 +62,6 @@ contract EthArNFT is ERC721URIStorage, Ownable {
     }
 
     function totalSupply() public view returns (uint256) {
-        return tokenCounter + 1;
+        return tokenCounter;
     }
 }
