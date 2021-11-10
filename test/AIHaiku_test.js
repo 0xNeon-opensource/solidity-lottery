@@ -130,7 +130,29 @@ skip.if(!developmentChains.includes(network.name)).
         ).should.be.rejected;
       })
 
-      it('rejects if has reached max supply and tries to mint', async () => {
+      it('can update signer public key', async () => {
+        const tokenSignaturePairs = generateTokenSignaturePairs(1);
+        const publicKeyForTestingOnlyWallet = ethers.utils.getAddress('0x23e8B49d0a0B5bb4A9D662E63b2d545fe2007148');
+        const tokenUri = 'http://localhost:1984/n3fTJlYslO6WSufVvy0jHIh9KmAQbAiNolKvHHK53pw';
+        const signatureFromTestingOnlyWallet = '0x64a97ffdb95690f68df7fcd2d741166de839069c9d0eb21a3dcd04241932a9f614a546c496c96ea1cfacf546e6933771ee9a3b680a54db4442e0e83519b5bdbf1c';
+
+        await contract.updateSignerPublicKey(publicKeyForTestingOnlyWallet);
+
+        await contract.mint(
+          tokenSignaturePairs[0].tokenUri,
+          // using signature from another token
+          tokenSignaturePairs[0].signature,
+          { value: MINT_PRICE_IN_ETHER }
+        ).should.be.rejected;
+
+        await contract.mint(
+          tokenUri,
+          signatureFromTestingOnlyWallet,
+          { value: MINT_PRICE_IN_ETHER }
+        );
+      })
+
+      xit('rejects if has reached max supply and tries to mint', async () => {
         const maxSupply = await contract.MAX_SUPPLY().then(bn => bn.toNumber());
         const tokenSignaturePairs = generateTokenSignaturePairs(maxSupply + 1);
 

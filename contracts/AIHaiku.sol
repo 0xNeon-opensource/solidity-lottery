@@ -64,4 +64,8 @@ contract AIHaiku is ERC721URIStorage, Ownable {
     function totalSupply() public view returns (uint256) {
         return tokenCounter;
     }
+
+    function updateSignerPublicKey(address newAddress) external onlyOwner {
+        trueSigner = newAddress;
+    }
 }
