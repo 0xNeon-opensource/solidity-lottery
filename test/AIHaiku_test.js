@@ -30,14 +30,14 @@ const { networkConfig, developmentChains } = require('../helper-hardhat-config')
 //   }
 // }
 skip.if(!developmentChains.includes(network.name)).
-  describe('EthArNFT Unit Tests', async function () {
+  describe('AI Haiku Unit Tests', async function () {
     let contract;
     const MINT_PRICE_IN_ETHER = ethers.utils.parseEther("0.01").toHexString();
 
     beforeEach(async () => {
-      await deployments.fixture(['ethArNft']);
-      const EthArNFT = await deployments.get("EthArNFT");
-      contract = await ethers.getContractAt("EthArNFT", EthArNFT.address);
+      await deployments.fixture(['aiHaiku']);
+      const AIHaiku = await deployments.get("AIHaiku");
+      contract = await ethers.getContractAt("AIHaiku", AIHaiku.address);
     })
 
     describe('deployment', async () => {
@@ -51,12 +51,12 @@ skip.if(!developmentChains.includes(network.name)).
 
       it('has a name', async () => {
         const name = await contract.name();
-        expect(name).to.eql('Eth Arweave NFT');
+        expect(name).to.eql('AI Haiku');
       });
 
       it('has a symbol', async () => {
         const symbol = await contract.symbol();
-        expect(symbol).to.eql('ETHARNFT');
+        expect(symbol).to.eql('HAIKU');
       });
     })
 

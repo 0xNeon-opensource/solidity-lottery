@@ -11,33 +11,33 @@ module.exports = async ({
     const chainId = await getChainId()
 
     log("----------------------------------------------------")
-    const EthArNFT = await deploy('EthArNFT', {
+    const AiHaiku = await deploy('AIHaiku', {
         from: deployer,
         log: true
     })
 
     log('')
     log('📜  📜  📜  📜  📜')
-    log(`You have deployed an NFT contract to ${EthArNFT.address}`)
+    log(`You have deployed an NFT contract to ${AiHaiku.address}`)
     log('📜  📜  📜  📜  📜')
     log('')
-    const ethArNftContract = await ethers.getContractFactory("EthArNFT")
+    const aiHaikuContract = await ethers.getContractFactory("AIHaiku")
     const accounts = await hre.ethers.getSigners()
     const signer = accounts[0]
-    const ethArNftContractInstance = new ethers.Contract(EthArNFT.address, ethArNftContract.interface, signer)
+    const aiHaikuContractInstance = new ethers.Contract(AiHaiku.address, aiHaikuContract.interface, signer)
     const networkName = networkConfig[chainId]['name']
 
     if (networkName === 'rinkeby') {
         log('')
         log('🔎  🔎  🔎  🔎  🔎')
-        log(`View the contract on https://rinkeby.etherscan.io/address/${ethArNftContractInstance.address}`)
+        log(`View the contract on https://rinkeby.etherscan.io/address/${aiHaikuContractInstance.address}`)
         log('🔎  🔎  🔎  🔎  🔎')
         log('')
     }
 
     log('')
     log('✅  ✅  ✅  ✅  ✅')
-    log(`Verify with:\n npx hardhat verify --network ${networkName} ${ethArNftContractInstance.address}`)
+    log(`Verify with:\n npx hardhat verify --network ${networkName} ${aiHaikuContractInstance.address}`)
     log('✅  ✅  ✅  ✅  ✅')
     log('')
     // tx = await ethArNftContractInstance.mint(
@@ -50,4 +50,4 @@ module.exports = async ({
     // console.log('totalSupply :>> ', totalSupply.toNumber());
 }
 
-module.exports.tags = ['all', 'ethArNft']
+module.exports.tags = ['all', 'aiHaiku']

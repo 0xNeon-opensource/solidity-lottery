@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.9;
+pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
@@ -7,10 +7,10 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import "hardhat/console.sol";
 
-contract EthArNFT is ERC721URIStorage, Ownable {
+contract AIHaiku is ERC721URIStorage, Ownable {
     using ECDSA for bytes32;
 
-    uint256 public constant MAX_SUPPLY = 100;
+    uint256 public constant MAX_SUPPLY = 3333;
     uint256 public constant PRICE = 0.01 ether;
 
     uint256 public tokenCounter;
@@ -18,7 +18,7 @@ contract EthArNFT is ERC721URIStorage, Ownable {
 
     mapping(string => bool) tokenUriExists;
 
-    event CreatedEthArNFT(uint256 indexed tokenId, string tokenURI);
+    event CreatedAIHaiku(uint256 indexed tokenId, string tokenURI);
 
     modifier doesNotExceedMaxSupply() {
         require(totalSupply() < MAX_SUPPLY, "Max supply has already been minted.");
@@ -42,7 +42,7 @@ contract EthArNFT is ERC721URIStorage, Ownable {
         _;
     }
 
-    constructor() ERC721("Eth Arweave NFT", "ETHARNFT") {
+    constructor() ERC721("AI Haiku", "HAIKU") {
         tokenCounter = 0;
         trueSigner = 0xDBA800F4Da03Dba3f604268aeC2AD9EB28A055A4;
     }
@@ -58,7 +58,7 @@ contract EthArNFT is ERC721URIStorage, Ownable {
         _setTokenURI(tokenCounter, tokenUri);
         tokenCounter = tokenCounter + 1;
         tokenUriExists[tokenUri] = true;
-        emit CreatedEthArNFT(tokenCounter, tokenUri);
+        emit CreatedAIHaiku(tokenCounter, tokenUri);
     }
 
     function totalSupply() public view returns (uint256) {

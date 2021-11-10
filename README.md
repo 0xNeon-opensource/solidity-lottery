@@ -1,2 +1,2 @@
-# eth-arweave-base-contract
+# ai-haiku-contract
  
