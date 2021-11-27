@@ -5,23 +5,18 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-import "hardhat/console.sol";
-
+/// @title AI Haiku
+/// @author @0xNeon - https://github.com/0xNeon-opensource
+/// @notice Collaborate with an AI Poet to create something truly unique.
 contract AIHaiku is ERC721URIStorage, Ownable {
     using ECDSA for bytes32;
 
     uint256 public constant maxSupply = 575;
     uint256 public constant price = 0.01 ether;
-    // (GMT): Monday, November 29, 2021 1:00:00 AM
-    // (CST): Sunday, November 28, 2021 7:00:00 PM
-    uint256 public constant mintTimeWhitelist = 1638147600;
-
-    // (GMT): Monday, November 29, 2021 2:00:00 AM
-    // (CST): Sunday, November 28, 2021 8:00:00 PM
-    uint256 public constant mintTimePublic = 1638151200;
 
     uint256 public tokenCounter;
     address private trueSigner;
+    address private payoutAddress;
 
     mapping(string => bool) tokenUriExists;
     mapping(address => uint256) whitelistedAddressToTimesMinted;
@@ -51,15 +46,10 @@ contract AIHaiku is ERC721URIStorage, Ownable {
         _;
     }
 
-    modifier ensureTimeToMint() {
-        // require(block.timestamp >= mintTimePublic, "Time to mint not yet reached.");
-        require(block.timestamp >= 0, "Time to mint not yet reached.");
-        _;
-    }
-
     constructor() ERC721("AI Haiku", "HAIKU") {
         tokenCounter = 0;
         trueSigner = 0xDBA800F4Da03Dba3f604268aeC2AD9EB28A055A4;
+        payoutAddress = 0x58B21e59fE9A3EDb48874fa7E549579AC6D35728;
     }
 
     function whitelistMint(string memory tokenUri, bytes memory signature)
@@ -83,7 +73,6 @@ contract AIHaiku is ERC721URIStorage, Ownable {
         private
         doesNotExceedMaxSupply
         tokenUriDoesNotExist(tokenUri)
-        ensureTimeToMint
     {
         _safeMint(msg.sender, tokenCounter);
         _setTokenURI(tokenCounter, tokenUri);
@@ -100,7 +89,7 @@ contract AIHaiku is ERC721URIStorage, Ownable {
         trueSigner = newAddress;
     }
 
-    function getReqAddress() public view returns (address) {
-        return msg.sender;
+    function payout() external onlyOwner {
+        payable(payoutAddress).transfer(address(this).balance);
     }
 }

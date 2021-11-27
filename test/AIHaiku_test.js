@@ -175,6 +175,23 @@ skip.if(!developmentChains.includes(network.name)).
         );
       })
 
+      // it('can payout', async () => {
+      //   const tokenSignaturePairs = generateTokenSignaturePairs(1);
+      //   const web3Instance = new web3();
+
+      //   await contract.publicMint(
+      //     tokenSignaturePairs[0].tokenUri,
+      //     tokenSignaturePairs[0].signature,
+      //     { value: MINT_PRICE_IN_ETHER }
+      //   );
+
+      //   const balance = web3Instance.eth.getBalance(contract.address);
+      //   await contract.payout();
+        
+      //   // const balance = web3Instance.eth.getBalance(ethers.utils.getAddress('0xDBA800F4Da03Dba3f604268aeC2AD9EB28A055A4'));
+      //   console.log(`balance`, balance)
+      // })
+
       xit('rejects if has reached max supply and tries to mint', async () => {
         const maxSupply = await contract.maxSupply().then(bn => bn.toNumber());
         const tokenSignaturePairs = generateTokenSignaturePairs(maxSupply + 1);
