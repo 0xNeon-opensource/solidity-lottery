@@ -64,7 +64,7 @@ skip.if(!developmentChains.includes(network.name)).
       it('mints and gets total supply', async () => {
         const tokenSignaturePairs = generateTokenSignaturePairs(2);
 
-        await contract.mint(
+        await contract.publicMint(
           tokenSignaturePairs[0].tokenUri,
           tokenSignaturePairs[0].signature,
           { value: MINT_PRICE_IN_ETHER }
@@ -73,7 +73,7 @@ skip.if(!developmentChains.includes(network.name)).
 
         assert.equal(totalSupply.toNumber(), 1);
 
-        await contract.mint(
+        await contract.publicMint(
           tokenSignaturePairs[1].tokenUri,
           tokenSignaturePairs[1].signature,
           { value: MINT_PRICE_IN_ETHER }
@@ -83,10 +83,33 @@ skip.if(!developmentChains.includes(network.name)).
         assert.equal(totalSupply.toNumber(), 2);
       })
 
+      it('mints as whitelisted address', async () => {
+        const whitelistedTokenSignaturePair = generateTokenSignaturePairForWhitelist();
+
+        await contract.whitelistMint(
+          whitelistedTokenSignaturePair.tokenUri,
+          whitelistedTokenSignaturePair.signature,
+          { value: MINT_PRICE_IN_ETHER }
+        );
+        let totalSupply = await contract.totalSupply();
+
+        assert.equal(totalSupply.toNumber(), 1);
+      })
+
+      it('cannot call public mint with whitelisted signature', async () => {
+        const whitelistedTokenSignaturePair = generateTokenSignaturePairForWhitelist();
+
+        await contract.publicMint(
+          whitelistedTokenSignaturePair.tokenUri,
+          whitelistedTokenSignaturePair.signature,
+          { value: MINT_PRICE_IN_ETHER }
+        ).should.be.rejected;
+      })
+
       it('gets tokenURI', async () => {
         const tokenSignaturePairs = generateTokenSignaturePairs(1);
 
-        await contract.mint(
+        await contract.publicMint(
           tokenSignaturePairs[0].tokenUri,
           tokenSignaturePairs[0].signature,
           { value: MINT_PRICE_IN_ETHER }
@@ -98,7 +121,7 @@ skip.if(!developmentChains.includes(network.name)).
 
       it('rejects if payment is not enough', async () => {
         const tokenSignaturePairs = generateTokenSignaturePairs(1);
-        await contract.mint(
+        await contract.publicMint(
           tokenSignaturePairs[0].tokenUri,
           tokenSignaturePairs[0].signature,
           { value: ethers.utils.parseEther("0").toHexString() }
@@ -107,13 +130,13 @@ skip.if(!developmentChains.includes(network.name)).
 
       it('rejects if uses a previously used tokenUri', async () => {
         const tokenSignaturePairs = generateTokenSignaturePairs(1);
-        await contract.mint(
+        await contract.publicMint(
           tokenSignaturePairs[0].tokenUri,
           tokenSignaturePairs[0].signature,
           { value: MINT_PRICE_IN_ETHER }
         );
 
-        await contract.mint(
+        await contract.publicMint(
           tokenSignaturePairs[0].tokenUri,
           tokenSignaturePairs[0].signature,
           { value: MINT_PRICE_IN_ETHER }
@@ -122,7 +145,7 @@ skip.if(!developmentChains.includes(network.name)).
 
       it('rejects if uses an invalid signature', async () => {
         const tokenSignaturePairs = generateTokenSignaturePairs(2);
-        await contract.mint(
+        await contract.publicMint(
           tokenSignaturePairs[0].tokenUri,
           // using signature from another token
           tokenSignaturePairs[1].signature,
@@ -138,31 +161,26 @@ skip.if(!developmentChains.includes(network.name)).
 
         await contract.updateSignerPublicKey(publicKeyForTestingOnlyWallet);
 
-        await contract.mint(
+        await contract.publicMint(
           tokenSignaturePairs[0].tokenUri,
           // using signature from another token
           tokenSignaturePairs[0].signature,
           { value: MINT_PRICE_IN_ETHER }
         ).should.be.rejected;
 
-        await contract.mint(
+        await contract.publicMint(
           tokenUri,
           signatureFromTestingOnlyWallet,
           { value: MINT_PRICE_IN_ETHER }
         );
       })
 
-      it('test', async() => {
-        const myAddress = await contract.getReqAddress();
-        console.log('myAddress :>> ', myAddress);
-      });
-
       xit('rejects if has reached max supply and tries to mint', async () => {
         const maxSupply = await contract.maxSupply().then(bn => bn.toNumber());
         const tokenSignaturePairs = generateTokenSignaturePairs(maxSupply + 1);
 
         for (let index = 0; index < maxSupply; index++) {
-          await contract.mint(
+          await contract.publicMint(
             tokenSignaturePairs[index].tokenUri,
             tokenSignaturePairs[index].signature,
             { value: MINT_PRICE_IN_ETHER }
@@ -170,7 +188,7 @@ skip.if(!developmentChains.includes(network.name)).
         }
 
         // Minting one too many...
-        await contract.mint(
+        await contract.publicMint(
           tokenSignaturePairs[tokenSignaturePairs.length - 1].tokenUri,
           tokenSignaturePairs[tokenSignaturePairs.length - 1].signature,
           { value: MINT_PRICE_IN_ETHER }
@@ -194,4 +212,16 @@ const generateTokenSignaturePairs = (numberOfPairs) => {
     tokenSignaturePairs.push({ tokenUri, signature: signature.signature });
   };
   return tokenSignaturePairs;
+}
+
+const generateTokenSignaturePairForWhitelist = () => {
+  const web3Instance = new web3();
+
+  let tokenUri;
+  let signature;
+  tokenUri = 'https://arweave.net/testTokenUri_0';
+  const hashedMessage = web3Instance.utils.soliditySha3({ type: 'string', value: 'Whitelisted:' + tokenUri });
+  signature = web3Instance.eth.accounts.sign(hashedMessage, process.env.TRUE_SIGNER_PRIVATE_KEY);
+
+  return { tokenUri, signature: signature.signature };
 }
