@@ -152,8 +152,13 @@ skip.if(!developmentChains.includes(network.name)).
         );
       })
 
+      it('test', async() => {
+        const myAddress = await contract.getReqAddress();
+        console.log('myAddress :>> ', myAddress);
+      });
+
       xit('rejects if has reached max supply and tries to mint', async () => {
-        const maxSupply = await contract.MAX_SUPPLY().then(bn => bn.toNumber());
+        const maxSupply = await contract.maxSupply().then(bn => bn.toNumber());
         const tokenSignaturePairs = generateTokenSignaturePairs(maxSupply + 1);
 
         for (let index = 0; index < maxSupply; index++) {
