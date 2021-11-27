@@ -62,7 +62,7 @@ skip.if(!developmentChains.includes(network.name)).
 
     describe('minting', async () => {
       it('mints and gets total supply', async () => {
-        const tokenSignaturePairs = generateTokenSignaturePairs(2);
+        const tokenSignaturePairs = generateTokenSignaturePairs(2, false);
 
         await contract.publicMint(
           tokenSignaturePairs[0].tokenUri,
@@ -83,31 +83,58 @@ skip.if(!developmentChains.includes(network.name)).
         assert.equal(totalSupply.toNumber(), 2);
       })
 
-      it('mints as whitelisted address', async () => {
-        const whitelistedTokenSignaturePair = generateTokenSignaturePairForWhitelist();
+      it('mints as whitelisted address at a max of three times', async () => {
+        const whitelistedTokenSignaturePair = generateTokenSignaturePairs(4, true);
+        const tokenSignaturePairs = generateTokenSignaturePairs(4, false);
 
         await contract.whitelistMint(
-          whitelistedTokenSignaturePair.tokenUri,
-          whitelistedTokenSignaturePair.signature,
+          whitelistedTokenSignaturePair[0].tokenUri,
+          whitelistedTokenSignaturePair[0].signature,
           { value: MINT_PRICE_IN_ETHER }
         );
+
+        await contract.whitelistMint(
+          whitelistedTokenSignaturePair[1].tokenUri,
+          whitelistedTokenSignaturePair[1].signature,
+          { value: MINT_PRICE_IN_ETHER }
+        );
+
+        await contract.whitelistMint(
+          whitelistedTokenSignaturePair[2].tokenUri,
+          whitelistedTokenSignaturePair[2].signature,
+          { value: MINT_PRICE_IN_ETHER }
+        );
+
+        await contract.whitelistMint(
+          whitelistedTokenSignaturePair[3].tokenUri,
+          whitelistedTokenSignaturePair[3].signature,
+          { value: MINT_PRICE_IN_ETHER }
+        ).should.be.rejected;
+
+        await contract.publicMint(
+          tokenSignaturePairs[3].tokenUri,
+          tokenSignaturePairs[3].signature,
+          { value: MINT_PRICE_IN_ETHER }
+        );
+
         let totalSupply = await contract.totalSupply();
 
-        assert.equal(totalSupply.toNumber(), 1);
+        assert.equal(totalSupply.toNumber(), 4);
+
       })
 
       it('cannot call public mint with whitelisted signature', async () => {
-        const whitelistedTokenSignaturePair = generateTokenSignaturePairForWhitelist();
+        const whitelistedTokenSignaturePair = generateTokenSignaturePairs(1, true);
 
         await contract.publicMint(
-          whitelistedTokenSignaturePair.tokenUri,
-          whitelistedTokenSignaturePair.signature,
+          whitelistedTokenSignaturePair[0].tokenUri,
+          whitelistedTokenSignaturePair[0].signature,
           { value: MINT_PRICE_IN_ETHER }
         ).should.be.rejected;
       })
 
       it('gets tokenURI', async () => {
-        const tokenSignaturePairs = generateTokenSignaturePairs(1);
+        const tokenSignaturePairs = generateTokenSignaturePairs(1, false);
 
         await contract.publicMint(
           tokenSignaturePairs[0].tokenUri,
@@ -120,7 +147,7 @@ skip.if(!developmentChains.includes(network.name)).
       })
 
       it('rejects if payment is not enough', async () => {
-        const tokenSignaturePairs = generateTokenSignaturePairs(1);
+        const tokenSignaturePairs = generateTokenSignaturePairs(1, false);
         await contract.publicMint(
           tokenSignaturePairs[0].tokenUri,
           tokenSignaturePairs[0].signature,
@@ -129,7 +156,7 @@ skip.if(!developmentChains.includes(network.name)).
       })
 
       it('rejects if uses a previously used tokenUri', async () => {
-        const tokenSignaturePairs = generateTokenSignaturePairs(1);
+        const tokenSignaturePairs = generateTokenSignaturePairs(1, false);
         await contract.publicMint(
           tokenSignaturePairs[0].tokenUri,
           tokenSignaturePairs[0].signature,
@@ -144,7 +171,7 @@ skip.if(!developmentChains.includes(network.name)).
       })
 
       it('rejects if uses an invalid signature', async () => {
-        const tokenSignaturePairs = generateTokenSignaturePairs(2);
+        const tokenSignaturePairs = generateTokenSignaturePairs(2, false);
         await contract.publicMint(
           tokenSignaturePairs[0].tokenUri,
           // using signature from another token
@@ -154,7 +181,7 @@ skip.if(!developmentChains.includes(network.name)).
       })
 
       it('can update signer public key', async () => {
-        const tokenSignaturePairs = generateTokenSignaturePairs(1);
+        const tokenSignaturePairs = generateTokenSignaturePairs(1, false);
         const publicKeyForTestingOnlyWallet = ethers.utils.getAddress('0x23e8B49d0a0B5bb4A9D662E63b2d545fe2007148');
         const tokenUri = 'http://localhost:1984/n3fTJlYslO6WSufVvy0jHIh9KmAQbAiNolKvHHK53pw';
         const signatureFromTestingOnlyWallet = '0x64a97ffdb95690f68df7fcd2d741166de839069c9d0eb21a3dcd04241932a9f614a546c496c96ea1cfacf546e6933771ee9a3b680a54db4442e0e83519b5bdbf1c';
@@ -194,7 +221,7 @@ skip.if(!developmentChains.includes(network.name)).
 
       xit('rejects if has reached max supply and tries to mint', async () => {
         const maxSupply = await contract.maxSupply().then(bn => bn.toNumber());
-        const tokenSignaturePairs = generateTokenSignaturePairs(maxSupply + 1);
+        const tokenSignaturePairs = generateTokenSignaturePairs(maxSupply + 1, false);
 
         for (let index = 0; index < maxSupply; index++) {
           await contract.publicMint(
@@ -215,7 +242,7 @@ skip.if(!developmentChains.includes(network.name)).
   })
 
 
-const generateTokenSignaturePairs = (numberOfPairs) => {
+const generateTokenSignaturePairs = (numberOfPairs, isWhitelist) => {
   const web3Instance = new web3();
 
   let tokenUri;
@@ -223,22 +250,11 @@ const generateTokenSignaturePairs = (numberOfPairs) => {
   const tokenSignaturePairs = [];
   for (let index = 0; index < numberOfPairs; index++) {
     tokenUri = 'https://arweave.net/testTokenUri_' + index.toString();
-    const hashedMessage = web3Instance.utils.soliditySha3({ type: 'string', value: tokenUri });
+    const tokenUriValue = isWhitelist ? "Whitelisted:" + tokenUri : tokenUri
+    const hashedMessage = web3Instance.utils.soliditySha3({ type: 'string', value: tokenUriValue });
     signature = web3Instance.eth.accounts.sign(hashedMessage, process.env.TRUE_SIGNER_PRIVATE_KEY);
 
     tokenSignaturePairs.push({ tokenUri, signature: signature.signature });
   };
   return tokenSignaturePairs;
-}
-
-const generateTokenSignaturePairForWhitelist = () => {
-  const web3Instance = new web3();
-
-  let tokenUri;
-  let signature;
-  tokenUri = 'https://arweave.net/testTokenUri_0';
-  const hashedMessage = web3Instance.utils.soliditySha3({ type: 'string', value: 'Whitelisted:' + tokenUri });
-  signature = web3Instance.eth.accounts.sign(hashedMessage, process.env.TRUE_SIGNER_PRIVATE_KEY);
-
-  return { tokenUri, signature: signature.signature };
 }

@@ -28,6 +28,11 @@ contract AIHaiku is ERC721URIStorage, Ownable {
         _;
     }
 
+    modifier whitelistLimitIsNotReached() {
+        require(whitelistedAddressToTimesMinted[msg.sender] < 3, "Number of mints per whitelist reached. Please wait until the public mint.");
+        _;
+    }
+
     modifier hasMinimumPayment(uint256 value) {
         require(value >= price);
         _;
@@ -56,9 +61,10 @@ contract AIHaiku is ERC721URIStorage, Ownable {
         external payable
         hasMinimumPayment(msg.value)
         ensureValidSignature(tokenUri, signature, true)
+        whitelistLimitIsNotReached
     {
         mint(tokenUri);
-        whitelistedAddressToTimesMinted[msg.sender] = 1;
+        whitelistedAddressToTimesMinted[msg.sender] = whitelistedAddressToTimesMinted[msg.sender] + 1;
     }
 
     function publicMint(string memory tokenUri, bytes memory signature)
