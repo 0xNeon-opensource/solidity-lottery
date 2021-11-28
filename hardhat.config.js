@@ -59,6 +59,9 @@ module.exports = {
                 mnemonic: MNEMONIC,
             },
             saveDeployments: true,
+            // Make gas and gasPrice low next time
+            gas: "auto",
+            gasPrice: "auto"
         },
         polygon: {
             url: "https://rpc-mainnet.maticvigil.com/",
