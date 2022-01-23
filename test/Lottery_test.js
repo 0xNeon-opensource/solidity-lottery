@@ -32,7 +32,33 @@ skip.if(!developmentChains.includes(network.name)).
       expect(address).to.not.be.undefined;
     })
 
-    it('enters you into the lottery', async () => {
+    it('onlyOwner can set minimum participants', async () => {
+      await contract.setMinimumParticipants(5);
+      await contract.connect(signers[1]).setMinimumParticipants(5).should.be.rejected;
+    });
+
+    it('can get minimum participants', async () => {
+      await contract.setMinimumParticipants(15);
+
+      const minimumParticipants = await contract.minimumParticipants();
+
+      expect(minimumParticipants).to.eq(15);
+    });
+
+    it('onlyOwner can set entrance fee', async () => {
+      await contract.setEntranceFee(1000);
+      await contract.connect(signers[1]).setEntranceFee(1000).should.be.rejected;
+    });
+
+    it('can get entrance fee', async () => {
+      await contract.setEntranceFee(1000000);
+
+      const entranceFee = await contract.entranceFee();
+
+      expect(entranceFee).to.eq(1000000);
+    });
+
+    it('you can enter into the lottery', async () => {
       await contract.enterInLottery();
 
       let participant = await contract.participants(0);
@@ -73,19 +99,6 @@ skip.if(!developmentChains.includes(network.name)).
 
       expect(await contract.chooseWinner()).to.be.an('string');
       await contract.connect(signers[1]).chooseWinner().should.be.rejected;
-    });
-
-    it('onlyOwner can set minimum participants', async () => {
-      await contract.setMinimumParticipants(5);
-      await contract.connect(signers[1]).setMinimumParticipants(5).should.be.rejected;
-    });
-
-    it('can get minimum participants', async () => {
-      await contract.setMinimumParticipants(15);
-
-      const minimumParticipants = await contract.minimumParticipants();
-
-      expect(minimumParticipants).to.eq(15);
     });
 
     it('should fail to choose winner when there are NOT enough participants', async () => {
