@@ -46,7 +46,7 @@ skip.if(!developmentChains.includes(network.name)).
       await contract.connect(signers[1]).enterInLottery();
       await contract.connect(signers[2]).enterInLottery();
       await contract.connect(signers[3]).enterInLottery();
-      
+
       let participant0 = await contract.participants(0);
       let participant1 = await contract.participants(1);
       let participant2 = await contract.participants(2);
@@ -68,19 +68,29 @@ skip.if(!developmentChains.includes(network.name)).
 
       expect(participantCount).to.eq(4);
     });
-    
+
     it('onlyOwner can call chooseWinner()', async () => {
+      enterAllSignersIntoLottery(signers, contract);
+
       expect(await contract.chooseWinner()).to.be.an('string');
       await contract.connect(signers[1]).chooseWinner().should.be.rejected;
     });
-    
+
+    it('should have enough players in lottery', async () => {
+      // const minimumParticipants = await contract.minimumParticipants();
+      const minimumParticipants = 1;
+
+      await contract.chooseWinner().should.be.rejected;
+
+    });
+
     // it('chooses a random participant', async () => {
     //   await contract.enterInLottery();
     //   await contract.connect(signers[1]).enterInLottery();
     //   await contract.connect(signers[2]).enterInLottery();
     //   await contract.connect(signers[3]).enterInLottery();
 
-      
+
     //   const winner = await contract.chooseWinner();
     //   const addresses = signers.map((signer) => signer.address);
 
@@ -88,3 +98,9 @@ skip.if(!developmentChains.includes(network.name)).
 
     // });
   })
+
+function enterAllSignersIntoLottery(signers, contract) {
+  signers.forEach(async signer => {
+    await contract.connect(signer).enterInLottery();
+  });
+}
