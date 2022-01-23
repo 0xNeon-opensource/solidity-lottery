@@ -1,5 +1,4 @@
 const { expect } = require('chai')
-const web3 = require('web3')
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
 chai.use(chaiAsPromised).should()
@@ -7,8 +6,8 @@ const BN = require('bn.js')
 const skipIf = require('mocha-skip-if')
 chai.use(require('chai-bn')(BN))
 const fs = require('fs')
-const { deployments, getChainId } = require('hardhat')
-const { networkConfig, developmentChains } = require('../helper-hardhat-config')
+const { deployments } = require('hardhat')
+const { developmentChains } = require('../helper-hardhat-config')
 
 skip.if(!developmentChains.includes(network.name)).
   describe('Lottery', async function () {
@@ -70,7 +69,7 @@ skip.if(!developmentChains.includes(network.name)).
     });
 
     it('onlyOwner can call chooseWinner()', async () => {
-      enterAllSignersIntoLottery(signers, contract);
+      enterAllTenSignersIntoLottery(signers, contract);
 
       expect(await contract.chooseWinner()).to.be.an('string');
       await contract.connect(signers[1]).chooseWinner().should.be.rejected;
@@ -98,7 +97,7 @@ skip.if(!developmentChains.includes(network.name)).
     it('should choose winner when there are enough participants', async () => {
       // const minimumParticipants = await contract.minimumParticipants();
       await contract.setMinimumParticipants(9);
-      await enterAllSignersIntoLottery(signers, contract);
+      await enterAllTenSignersIntoLottery(signers, contract);
 
       const winner = await contract.chooseWinner();
       const addresses = signers.map((signer) => signer.address);
@@ -107,7 +106,7 @@ skip.if(!developmentChains.includes(network.name)).
     });
   });
 
-async function enterAllSignersIntoLottery(signers, contract) {
+async function enterAllTenSignersIntoLottery(signers, contract) {
   signers.forEach(async signer => {
     await contract.connect(signer).enterInLottery();
   });

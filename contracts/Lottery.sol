@@ -40,8 +40,6 @@ contract Lottery is Ownable {
         onlyOwner
         ensureMinimumParticipantsHaveEntered
         returns (address payable) {
-        
         return participants[getRandomNumber() % participants.length];
-        // return participants[getRandomNumber() % participants.length];
     }
 }
