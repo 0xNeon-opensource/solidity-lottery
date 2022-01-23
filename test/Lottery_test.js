@@ -11,7 +11,7 @@ const { deployments, getChainId } = require('hardhat')
 const { networkConfig, developmentChains } = require('../helper-hardhat-config')
 
 skip.if(!developmentChains.includes(network.name)).
-  describe('Lottery Unit Tests', async function () {
+  describe('Lottery', async function () {
     let contract;
 
     beforeEach(async () => {
@@ -20,15 +20,22 @@ skip.if(!developmentChains.includes(network.name)).
       contract = await ethers.getContractAt("Lottery", Lottery.address);
     })
 
-    describe('deployment', async () => {
-      it('deploys successfully', async () => {
-        const address = contract.address;
-        expect(address).to.not.eql(0x0);
-        expect(address).to.not.be.empty;
-        expect(address).to.not.be.null;
-        expect(address).to.not.be.undefined;
-      })
+    it('deploys successfully', async () => {
+      const address = contract.address;
+      expect(address).to.not.eql(0x0);
+      expect(address).to.not.be.empty;
+      expect(address).to.not.be.null;
+      expect(address).to.not.be.undefined;
     })
 
+    it('enters you into the lottery', async () => {
+      await contract.enterInLottery();
+
+      let participants = await contract.participants(0);
+      let address = await ethers.getSigners().then((signers) => signers[0].address);
+
+      expect(participants).to.eq(address);
+    });
+    
   })
 

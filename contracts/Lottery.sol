@@ -3,12 +3,18 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-/// @title AI Haiku
+/// @title Lottery
 /// @author @0xNeon - https://github.com/0xNeon-opensource
-/// @notice Collaborate with an AI Poet to create something truly unique.
+/// @notice Win magic internet money with this lottery contract!
 contract Lottery is Ownable {
 
+    address payable[] public participants;
+
     constructor() {
-        
+
+    }
+
+    function enterInLottery() external {
+        participants.push(payable(msg.sender));
     }
 }
