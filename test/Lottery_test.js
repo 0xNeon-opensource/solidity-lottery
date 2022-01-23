@@ -13,6 +13,11 @@ const { networkConfig, developmentChains } = require('../helper-hardhat-config')
 skip.if(!developmentChains.includes(network.name)).
   describe('Lottery', async function () {
     let contract;
+    let signers;
+
+    before(async () => {
+      signers = await ethers.getSigners();
+    });
 
     beforeEach(async () => {
       await deployments.fixture(['lottery']);
@@ -32,9 +37,16 @@ skip.if(!developmentChains.includes(network.name)).
       await contract.enterInLottery();
 
       let participants = await contract.participants(0);
-      let address = await ethers.getSigners().then((signers) => signers[0].address);
 
-      expect(participants).to.eq(address);
+      expect(participants).to.eq(signers[0].address);
+    });
+
+    it('enters a different address into the lottery', async () => {
+      await contract.connect(signers[1]).enterInLottery();
+
+      let participants = await contract.participants(0);
+
+      expect(participants).to.eq(signers[1].address);
     });
     
   })
