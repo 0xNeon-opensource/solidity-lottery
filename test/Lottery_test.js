@@ -80,13 +80,25 @@ skip.if(!developmentChains.includes(network.name)).
       await contract.setMinimumParticipants(5);
       await contract.connect(signers[1]).setMinimumParticipants(5).should.be.rejected;
     });
-
-    it('should have enough players in lottery', async () => {
+    
+    it('can get minimum participants', async () => {
+      await contract.setMinimumParticipants(15);
+      
       const minimumParticipants = await contract.minimumParticipants();
-
-      await contract.chooseWinner().should.be.rejected;
-
+      
+      expect(minimumParticipants).to.eq(15);
     });
+
+    it('should fail to choose winner when there are NOT enough participants', async () => {
+      await contract.setMinimumParticipants(1);
+      
+      await contract.chooseWinner().should.be.rejected;
+    });
+    
+    // it('should choose winner when there are enough participants', async () => {
+    //   const minimumParticipants = await contract.minimumParticipants();
+      
+    // });
 
     // it('chooses a random participant', async () => {
     //   await contract.enterInLottery();
