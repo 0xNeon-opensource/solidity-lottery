@@ -1,2 +1,2 @@
-# ai-haiku-contract
+# Polygon Lottery
  
