@@ -111,18 +111,15 @@ skip.if(!developmentChains.includes(network.name)).
     });
 
     it('gets number of participants', async () => {
-      await contract.enterInLottery();
-      await contract.connect(signers[1]).enterInLottery();
-      await contract.connect(signers[2]).enterInLottery();
-      await contract.connect(signers[3]).enterInLottery();
+      await enterAllTwentySignersIntoLottery(signers, contract);
 
       const participantCount = await contract.getParticipantCount();
 
-      expect(participantCount).to.eq(4);
+      expect(participantCount).to.eq(20);
     });
 
     it('onlyOwner can call chooseWinner()', async () => {
-      enterAllTenSignersIntoLottery(signers, contract);
+      await enterAllTwentySignersIntoLottery(signers, contract);
 
       expect(await contract.chooseWinner()).to.be.an('string');
       await contract.connect(signers[1]).chooseWinner().should.be.rejected;
@@ -134,10 +131,16 @@ skip.if(!developmentChains.includes(network.name)).
       await contract.chooseWinner().should.be.rejected;
     });
 
+    it('should fail to choose winner when there 0 participants', async () => {
+      await contract.setMinimumParticipants(0);
+
+      await contract.chooseWinner().should.be.rejected;
+    });
+
     it('should choose winner when there are enough participants', async () => {
       // const minimumParticipants = await contract.minimumParticipants();
       await contract.setMinimumParticipants(9);
-      await enterAllTenSignersIntoLottery(signers, contract);
+      await enterAllTwentySignersIntoLottery(signers, contract);
 
       const winner = await contract.chooseWinner();
       const addresses = signers.map((signer) => signer.address);
@@ -146,8 +149,10 @@ skip.if(!developmentChains.includes(network.name)).
     });
   });
 
-async function enterAllTenSignersIntoLottery(signers, contract) {
+async function enterAllTwentySignersIntoLottery(signers, contract) {
+  const entranceFee = await contract.entranceFeeInWei().then((fee) => fee.toString());
+
   signers.forEach(async signer => {
-    await contract.connect(signer).enterInLottery();
+    await contract.connect(signer).enterInLottery({ value: entranceFee });
   });
 }

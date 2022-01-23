@@ -13,7 +13,10 @@ contract Lottery is Ownable {
     uint256 public housePayoutPercentage;
 
     modifier ensureMinimumParticipantsHaveEntered() {
-        require(participants.length >= minimumParticipants, "Minimum number of participants not reached.");
+        require(
+            participants.length >= minimumParticipants && participants.length > 0,
+            "Minimum number of participants not reached."
+        );
         _;
     }
 
