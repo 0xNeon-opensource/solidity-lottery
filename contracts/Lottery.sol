@@ -16,8 +16,9 @@ contract Lottery is Ownable {
         _;
     }
 
-    constructor(uint256 _minimumParticipants) {
+    constructor(uint256 _minimumParticipants, uint256 _entranceFee) {
         minimumParticipants = _minimumParticipants;
+        entranceFee = _entranceFee;
     }
 
     function enterInLottery() external {

@@ -13,7 +13,7 @@ module.exports = async ({
     log("----------------------------------------------------")
     const Lottery = await deploy('Lottery', {
         from: deployer,
-        args: [1],
+        args: [1, 1000000],
         log: true
     })
 
