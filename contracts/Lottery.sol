@@ -11,8 +11,9 @@ contract Lottery is Ownable {
     uint256 public minimumParticipants;
     uint256 public entranceFeeInWei;
     uint256 public housePayoutPercentage;
+    address public housePayoutAddress;
 
-    modifier ensureMinimumParticipantsHaveEntered() {
+    modifier minimumParticipantsHaveEntered() {
         require(
             participants.length >= minimumParticipants && participants.length > 0,
             "Minimum number of participants not reached."
@@ -20,12 +21,16 @@ contract Lottery is Ownable {
         _;
     }
 
+    modifier entranceFeePaid(uint256 paid) {
+        require(paid >= entranceFeeInWei, "Please provide the entrance fee.");
+        _;
+    }
+
     constructor(uint256 _minimumParticipants) {
         minimumParticipants = _minimumParticipants;
     }
 
-    function enterInLottery() external payable {
-        require(msg.value >= entranceFeeInWei, "Please provide the entrance fee.");
+    function enterInLottery() external payable entranceFeePaid(msg.value) {
         participants.push(payable(msg.sender));
     }
 
@@ -46,6 +51,10 @@ contract Lottery is Ownable {
         housePayoutPercentage = n;
     }
 
+    function setHousePayoutAddress(address a) external onlyOwner {
+        housePayoutAddress = a;
+    }
+
     function unsafeGetRandomNumber() private view returns (uint256) {
         return uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp, participants.length)));
     }
@@ -53,7 +62,7 @@ contract Lottery is Ownable {
     function chooseWinner()
         external view
         onlyOwner
-        ensureMinimumParticipantsHaveEntered
+        minimumParticipantsHaveEntered
         returns (address payable) {
         return participants[unsafeGetRandomNumber() % participants.length];
     }

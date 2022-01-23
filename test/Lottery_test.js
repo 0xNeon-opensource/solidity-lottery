@@ -13,9 +13,13 @@ skip.if(!developmentChains.includes(network.name)).
   describe('Lottery', async function () {
     let contract;
     let signers;
+    let signerAddresses;
+    let exampleAddress;
 
     before(async () => {
       signers = await ethers.getSigners();
+      signerAddresses = signers.map((signer) => signer.address);
+      exampleAddress = ethers.utils.getAddress('0x23e8B49d0a0B5bb4A9D662E63b2d545fe2007148');
     });
 
     beforeEach(async () => {
@@ -66,13 +70,26 @@ skip.if(!developmentChains.includes(network.name)).
     it('can get house payout percentage', async () => {
       await contract.setHousePayoutPercentage(10);
 
-      const entranceFee = await contract.housePayoutPercentage();
+      const payoutPercentage = await contract.housePayoutPercentage();
 
-      expect(entranceFee).to.eq(10);
+      expect(payoutPercentage).to.eq(10);
     });
 
     it('house payout percentage cannot be more than 100', async () => {
       await contract.setHousePayoutPercentage(101).should.be.rejected;
+    });
+
+    it('onlyOwner can set house payout address', async () => {
+      await contract.setHousePayoutAddress(exampleAddress);
+      await contract.connect(signers[1]).setHousePayoutAddress(exampleAddress).should.be.rejected;
+    });
+
+    it('can get house payout address', async () => {
+      await contract.setHousePayoutAddress(exampleAddress);
+
+      const payoutAddress = await contract.housePayoutAddress();
+
+      expect(payoutAddress).to.eq(exampleAddress);
     });
 
     it('rejects if payment is not enough', async () => {
@@ -143,9 +160,8 @@ skip.if(!developmentChains.includes(network.name)).
       await enterAllTwentySignersIntoLottery(signers, contract);
 
       const winner = await contract.chooseWinner();
-      const addresses = signers.map((signer) => signer.address);
-
-      expect(addresses).to.include(winner);
+      
+      expect(signerAddresses).to.include(winner);
     });
   });
 
