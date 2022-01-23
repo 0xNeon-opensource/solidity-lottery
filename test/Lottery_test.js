@@ -76,9 +76,13 @@ skip.if(!developmentChains.includes(network.name)).
       await contract.connect(signers[1]).chooseWinner().should.be.rejected;
     });
 
+    it('onlyOwner can set minimum participants', async () => {
+      await contract.setMinimumParticipants(5);
+      await contract.connect(signers[1]).setMinimumParticipants(5).should.be.rejected;
+    });
+
     it('should have enough players in lottery', async () => {
-      // const minimumParticipants = await contract.minimumParticipants();
-      const minimumParticipants = 1;
+      const minimumParticipants = await contract.minimumParticipants();
 
       await contract.chooseWinner().should.be.rejected;
 

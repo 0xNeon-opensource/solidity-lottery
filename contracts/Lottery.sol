@@ -8,7 +8,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @notice Win magic internet money with this lottery contract!
 contract Lottery is Ownable {
     address payable[] public participants;
-    uint256 minimumParticipants;
+    uint256 public minimumParticipants;
+
+    modifier ensureMinimumParticipantsHaveEntered() {
+        require(participants.length >= minimumParticipants, "Minimum number of participants not reached.");
+        _;
+    }
 
     constructor() {
         minimumParticipants = 1;
@@ -22,12 +27,20 @@ contract Lottery is Ownable {
         return participants.length;
     }
 
+    function setMinimumParticipants(uint256 n) external onlyOwner {
+        minimumParticipants = n;
+    }
+
     function getRandomNumber() private view returns (uint256) {
         return uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp, participants.length)));
     }
 
-    function chooseWinner() external view onlyOwner returns (address payable) {
-        require(participants.length >= minimumParticipants, "Minimum number of participants not reached.");
+    function chooseWinner()
+        external view
+        onlyOwner
+        ensureMinimumParticipantsHaveEntered
+        returns (address payable) {
+        
         return payable(0xDBA800F4Da03Dba3f604268aeC2AD9EB28A055A4);
         // return participants[getRandomNumber() % participants.length];
     }
