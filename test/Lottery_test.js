@@ -69,4 +69,22 @@ skip.if(!developmentChains.includes(network.name)).
       expect(participantCount).to.eq(4);
     });
     
+    it('onlyOwner can call chooseWinner()', async () => {
+      expect(await contract.chooseWinner()).to.be.an('string');
+      await contract.connect(signers[1]).chooseWinner().should.be.rejected;
+    });
+    
+    // it('chooses a random participant', async () => {
+    //   await contract.enterInLottery();
+    //   await contract.connect(signers[1]).enterInLottery();
+    //   await contract.connect(signers[2]).enterInLottery();
+    //   await contract.connect(signers[3]).enterInLottery();
+
+      
+    //   const winner = await contract.chooseWinner();
+    //   const addresses = signers.map((signer) => signer.address);
+
+    //   expect(addresses).to.include(winner);
+
+    // });
   })

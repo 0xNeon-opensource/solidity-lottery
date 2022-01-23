@@ -19,4 +19,11 @@ contract Lottery is Ownable {
         return participants.length;
     }
 
+    function getRandomNumber(uint256 maxNumberExclusive) private view returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp, maxNumberExclusive)));
+    }
+
+    function chooseWinner() external view onlyOwner returns (address payable) {
+        return payable(0xDBA800F4Da03Dba3f604268aeC2AD9EB28A055A4);
+    }
 }
