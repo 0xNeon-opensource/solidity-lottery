@@ -41,14 +41,6 @@ skip.if(!developmentChains.includes(network.name)).
       expect(participant).to.eq(signers[0].address);
     });
 
-    it('enters a different address into the lottery', async () => {
-      await contract.connect(signers[1]).enterInLottery();
-
-      let participant = await contract.participants(0);
-
-      expect(participant).to.eq(signers[1].address);
-    });
-
     it('enters multiple participants into lottery', async () => {
       await contract.enterInLottery();
       await contract.connect(signers[1]).enterInLottery();
@@ -65,6 +57,16 @@ skip.if(!developmentChains.includes(network.name)).
       expect(participant2).to.eq(signers[2].address);
       expect(participant3).to.eq(signers[3].address);
     });
+
+    it('gets number of participants', async () => {
+      await contract.enterInLottery();
+      await contract.connect(signers[1]).enterInLottery();
+      await contract.connect(signers[2]).enterInLottery();
+      await contract.connect(signers[3]).enterInLottery();
+
+      const participantCount = await contract.getParticipantCount();
+
+      expect(participantCount).to.eq(4);
+    });
     
   })
-

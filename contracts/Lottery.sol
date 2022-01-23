@@ -15,7 +15,8 @@ contract Lottery is Ownable {
         participants.push(payable(msg.sender));
     }
 
-    function random() private view returns (uint256) {
-        return uint256(keccak256(abi.encode(block.timestamp, participants)));
+    function getParticipantCount() external view returns (uint256) {
+        return participants.length;
     }
+
 }
