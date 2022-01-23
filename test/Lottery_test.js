@@ -80,42 +80,34 @@ skip.if(!developmentChains.includes(network.name)).
       await contract.setMinimumParticipants(5);
       await contract.connect(signers[1]).setMinimumParticipants(5).should.be.rejected;
     });
-    
+
     it('can get minimum participants', async () => {
       await contract.setMinimumParticipants(15);
-      
+
       const minimumParticipants = await contract.minimumParticipants();
-      
+
       expect(minimumParticipants).to.eq(15);
     });
 
     it('should fail to choose winner when there are NOT enough participants', async () => {
       await contract.setMinimumParticipants(1);
-      
+
       await contract.chooseWinner().should.be.rejected;
     });
-    
-    // it('should choose winner when there are enough participants', async () => {
-    //   const minimumParticipants = await contract.minimumParticipants();
-      
-    // });
 
-    // it('chooses a random participant', async () => {
-    //   await contract.enterInLottery();
-    //   await contract.connect(signers[1]).enterInLottery();
-    //   await contract.connect(signers[2]).enterInLottery();
-    //   await contract.connect(signers[3]).enterInLottery();
+    it('should choose winner when there are enough participants', async () => {
+      // const minimumParticipants = await contract.minimumParticipants();
+      await contract.setMinimumParticipants(9);
+      await enterAllSignersIntoLottery(signers, contract);
 
+      const winner = await contract.chooseWinner();
+      const addresses = signers.map((signer) => signer.address);
 
-    //   const winner = await contract.chooseWinner();
-    //   const addresses = signers.map((signer) => signer.address);
+      expect(addresses).to.include(winner);
+    });
+  });
 
-    //   expect(addresses).to.include(winner);
-
-    // });
-  })
-
-function enterAllSignersIntoLottery(signers, contract) {
+async function enterAllSignersIntoLottery(signers, contract) {
   signers.forEach(async signer => {
     await contract.connect(signer).enterInLottery();
   });
