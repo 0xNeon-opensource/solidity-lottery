@@ -71,6 +71,10 @@ skip.if(!developmentChains.includes(network.name)).
       expect(entranceFee).to.eq(10);
     });
 
+    it('house payout percentage cannot be more than 100', async () => {
+      await contract.setHousePayoutPercentage(101).should.be.rejected;
+    });
+
     it('rejects if payment is not enough', async () => {
       await contract.setEntranceFeeInWei(1);
 

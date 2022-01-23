@@ -39,6 +39,7 @@ contract Lottery is Ownable {
     }
 
     function setHousePayoutPercentage(uint256 n) external onlyOwner {
+        require(n <= 100, "House payout percentage cannot be more than 100.");
         housePayoutPercentage = n;
     }
 
