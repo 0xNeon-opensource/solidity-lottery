@@ -46,20 +46,20 @@ skip.if(!developmentChains.includes(network.name)).
     });
 
     it('onlyOwner can set entrance fee', async () => {
-      await contract.setEntranceFeeInEther(1000);
-      await contract.connect(signers[1]).setEntranceFeeInEther(1000).should.be.rejected;
+      await contract.setEntranceFeeInWei(1000);
+      await contract.connect(signers[1]).setEntranceFeeInWei(1000).should.be.rejected;
     });
 
     it('can get entrance fee', async () => {
-      await contract.setEntranceFeeInEther(1);
+      await contract.setEntranceFeeInWei(1);
 
-      const entranceFee = await contract.entranceFeeInEther();
+      const entranceFee = await contract.entranceFeeInWei();
 
       expect(entranceFee).to.eq(1);
     });
 
     it('rejects if payment is not enough', async () => {
-      await contract.setEntranceFeeInEther(1);
+      await contract.setEntranceFeeInWei(1);
 
       await contract.enterInLottery(
         { value: ethers.utils.parseEther("0").toHexString() }
@@ -67,7 +67,7 @@ skip.if(!developmentChains.includes(network.name)).
     });
 
     it('should enter into lottery if payment is correct', async () => {
-      const entranceFee = await contract.entranceFeeInEther().then((fee) => fee.toString());
+      const entranceFee = await contract.entranceFeeInWei().then((fee) => fee.toString());
       console.log('entranceFee', entranceFee);
       const lotteryPrice = ethers.utils.parseEther(entranceFee);
       console.log('lotteryPrice', lotteryPrice.toNumber());
