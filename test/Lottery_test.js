@@ -58,6 +58,19 @@ skip.if(!developmentChains.includes(network.name)).
       expect(entranceFee).to.eq(1);
     });
 
+    it('onlyOwner can set house payout percentage', async () => {
+      await contract.setHousePayoutPercentage(10);
+      await contract.connect(signers[1]).setHousePayoutPercentage(10).should.be.rejected;
+    });
+
+    it('can get house payout percentage', async () => {
+      await contract.setHousePayoutPercentage(10);
+
+      const entranceFee = await contract.housePayoutPercentage();
+
+      expect(entranceFee).to.eq(10);
+    });
+
     it('rejects if payment is not enough', async () => {
       await contract.setEntranceFeeInWei(1);
 

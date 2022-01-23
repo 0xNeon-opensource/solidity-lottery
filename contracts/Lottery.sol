@@ -10,6 +10,7 @@ contract Lottery is Ownable {
     address payable[] public participants;
     uint256 public minimumParticipants;
     uint256 public entranceFeeInWei;
+    uint256 public housePayoutPercentage;
 
     modifier ensureMinimumParticipantsHaveEntered() {
         require(participants.length >= minimumParticipants, "Minimum number of participants not reached.");
@@ -35,6 +36,10 @@ contract Lottery is Ownable {
 
     function setEntranceFeeInWei(uint256 n) external onlyOwner {
         entranceFeeInWei = n;
+    }
+
+    function setHousePayoutPercentage(uint256 n) external onlyOwner {
+        housePayoutPercentage = n;
     }
 
     function unsafeGetRandomNumber() private view returns (uint256) {
