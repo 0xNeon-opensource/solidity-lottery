@@ -101,6 +101,12 @@ skip.if(!developmentChains.includes(network.name)).
 
         expect(payoutAddress).to.eq(exampleAddress);
       });
+
+      it('can get contract balance', async () => {
+        const balance = await contract.getBalance().then(bn => bn.toNumber());
+
+        expect(balance).to.eq(0);
+      });
     });
 
     describe('Entering the lottery', () => {
@@ -160,9 +166,22 @@ skip.if(!developmentChains.includes(network.name)).
       });
   
       it('should choose winner when there are enough participants', async () => {
+        await contract.setMinimumParticipants(3);
+        await contract.enterInLottery();
+        await contract.connect(signers[1]).enterInLottery();
+
+        await contract.chooseWinner().should.be.rejected;
+
+        await contract.connect(signers[2]).enterInLottery();
+
+        await contract.chooseWinner().should.not.be.rejected;
+      });
+  
+      it('should emit an event with the winner and winnings', async () => {
+        // signerAddresses[0] enters the lottery
         await contract.enterInLottery();
   
-        expect(await contract.chooseWinner()).to.emit(contract, 'LotteryWon').withArgs(signerAddresses[0]);
+        expect(await contract.chooseWinner()).to.emit(contract, 'LotteryWon').withArgs(signerAddresses[0], "0");
       });
 
       it('should pay house address the correct percentage when winner is chosen', async () => {
@@ -177,6 +196,25 @@ skip.if(!developmentChains.includes(network.name)).
         await contract.chooseWinner();
         
         expect(await provider.getBalance(exampleAddress)).to.eq(expectedPayoutForHouse);
+      });
+
+      xit('should pay lottery winner the correct percentage when winner is chosen', async () => {
+        const entranceFee = 100
+        await contract.setEntranceFeeInWei(entranceFee);
+        await contract.setHousePayoutPercentage(5);
+        await contract.setHousePayoutAddress(exampleAddress);
+        // signerAddresses[0] enters the lottery
+        await contract.enterInLottery({ value: entranceFee });
+        // Fee = 100; Number of participants = 1; Winner payout = 100% - 5% = 95%
+        const expectedPayoutForWinner = 100 * 1 * .95;
+
+        const balanceBeforeWinning = await provider.getBalance(signerAddresses[0])
+        await contract.chooseWinner();
+        const balanceAfterWinning = await provider.getBalance(signerAddresses[0])
+
+        const finalBalance = balanceBeforeWinning - balanceAfterWinning
+        console.log('finalBalance', finalBalance);
+        expect(finalBalance).to.eq(expectedPayoutForWinner);
       });
     });
   });

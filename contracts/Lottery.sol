@@ -13,7 +13,7 @@ contract Lottery is Ownable {
     uint256 public housePayoutPercentage;
     address public housePayoutAddress;
 
-    event LotteryWon(address);
+    event LotteryWon(address, uint256);
 
     modifier minimumParticipantsHaveEntered() {
         require(
@@ -38,6 +38,10 @@ contract Lottery is Ownable {
 
     function getParticipantCount() external view returns (uint256) {
         return participants.length;
+    }
+
+    function getBalance() external view returns (uint256) {
+        return address(this).balance;
     }
 
     function setMinimumParticipants(uint256 n) external onlyOwner {
@@ -66,6 +70,9 @@ contract Lottery is Ownable {
         onlyOwner
         minimumParticipantsHaveEntered {
             payable(housePayoutAddress).transfer(address(this).balance * housePayoutPercentage / 100);
-            emit LotteryWon(participants[unsafeGetRandomNumber() % participants.length]);
+            address winner = participants[unsafeGetRandomNumber() % participants.length];
+            uint256 winnerPayout = address(this).balance;
+            payable(winner).transfer(winnerPayout);
+            emit LotteryWon(winner, winnerPayout);
     }
 }
