@@ -6,11 +6,12 @@ const BN = require('bn.js')
 const skipIf = require('mocha-skip-if')
 chai.use(require('chai-bn')(BN))
 const fs = require('fs')
-const { deployments } = require('hardhat')
+const { deployments, waffle } = require('hardhat')
 const { developmentChains } = require('../helper-hardhat-config')
 
 skip.if(!developmentChains.includes(network.name)).
   describe('Lottery', async function () {
+    const provider = waffle.provider;
     let contract;
     let signers;
     let signerAddresses;
@@ -142,8 +143,7 @@ skip.if(!developmentChains.includes(network.name)).
     describe('Winning the lottery', () => {
       it('onlyOwner can call chooseWinner()', async () => {
         await enterAllTwentySignersIntoLottery(signers, contract);
-  
-        expect(await contract.chooseWinner()).to.be.an('string');
+
         await contract.connect(signers[1]).chooseWinner().should.be.rejected;
       });
   
@@ -160,13 +160,23 @@ skip.if(!developmentChains.includes(network.name)).
       });
   
       it('should choose winner when there are enough participants', async () => {
-        // const minimumParticipants = await contract.minimumParticipants();
-        await contract.setMinimumParticipants(9);
+        await contract.enterInLottery();
+  
+        expect(await contract.chooseWinner()).to.emit(contract, 'LotteryWon').withArgs(signerAddresses[0]);
+      });
+
+      it('should pay house address the correct percentage when winner is chosen', async () => {
+        await contract.setEntranceFeeInWei(10);
+        await contract.setHousePayoutPercentage(5);
+        await contract.setHousePayoutAddress(exampleAddress);
         await enterAllTwentySignersIntoLottery(signers, contract);
-  
-        const winner = await contract.chooseWinner();
-  
-        expect(signerAddresses).to.include(winner);
+        // Fee = 10; Number of participants = 20; House payout = 5%
+        const expectedPayoutForHouse = 10 * 20 * .05;
+
+        expect(await provider.getBalance(exampleAddress)).to.eq(0);
+        await contract.chooseWinner();
+        
+        expect(await provider.getBalance(exampleAddress)).to.eq(expectedPayoutForHouse);
       });
     });
   });
