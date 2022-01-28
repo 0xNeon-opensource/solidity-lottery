@@ -72,6 +72,7 @@ contract Lottery is Ownable {
             payable(housePayoutAddress).transfer(address(this).balance * housePayoutPercentage / 100);
             address winner = participants[unsafeGetRandomNumber() % participants.length];
             uint256 winnerPayout = address(this).balance;
+            // Change transfer to call. See: https://solidity-by-example.org/sending-ether/
             payable(winner).transfer(winnerPayout);
             emit LotteryWon(winner, winnerPayout);
     }
